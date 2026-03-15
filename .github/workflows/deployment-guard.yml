@@ -1,0 +1,19 @@
+name: Deployment Guard
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  risk-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Deployment Guard
+        id: guard
+        uses: BlueCodeIT/deployment-guard-action@v1
+        with:
+          api-key: ${{ secrets.GUARD_API_KEY }}
