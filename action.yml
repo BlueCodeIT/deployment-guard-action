@@ -1,0 +1,49 @@
+name: 'Deployment Guard'
+description: 'KI-gestützter Risk Score vor jedem Deployment. Analysiert Code-Änderungen und blockiert riskante Deployments automatisch.'
+author: 'BlueCode IT'
+
+branding:
+  icon: 'shield'
+  color: 'blue'
+
+inputs:
+  api-key:
+    description: 'Deployment Guard API Key (aus bluecodeit.com/signup)'
+    required: true
+  fail-on-blocked:
+    description: 'Pipeline bei BLOCKED Status fehlschlagen lassen'
+    required: false
+    default: 'true'
+  incidents-last-7d:
+    description: 'Anzahl Incidents in den letzten 7 Tagen'
+    required: false
+    default: '0'
+  incidents-last-30d:
+    description: 'Anzahl Incidents in den letzten 30 Tagen'
+    required: false
+    default: '0'
+
+outputs:
+  score:
+    description: 'Risk Score (0-100)'
+  verdict:
+    description: 'Verdict (LOW RISK / MEDIUM RISK / HIGH RISK / CRITICAL RISK)'
+  status:
+    description: 'Status (PASS / WARN / BLOCKED)'
+  explanation:
+    description: 'KI-Erklärung des Scores'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Run Deployment Guard Analysis
+      shell: bash
+      run: ${{ github.action_path }}/scripts/analyze.sh
+      env:
+        GUARD_API_KEY: ${{ inputs.api-key }}
+        FAIL_ON_BLOCKED: ${{ inputs.fail-on-blocked }}
+        INCIDENTS_7D: ${{ inputs.incidents-last-7d }}
+        INCIDENTS_30D: ${{ inputs.incidents-last-30d }}
+        GITHUB_REPO: ${{ github.repository }}
+        GITHUB_BRANCH: ${{ github.ref_name }}
+        GITHUB_SHA: ${{ github.sha }}
