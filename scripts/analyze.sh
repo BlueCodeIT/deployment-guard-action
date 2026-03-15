@@ -15,6 +15,12 @@ DEPS=$(git diff HEAD~1 --name-only 2>/dev/null | grep -cE 'package\.json|require
 [ -z "$K8S" ] && K8S=0
 [ -z "$DEPS" ] && DEPS=0
 
+ADDED=$(echo "${ADDED:-0}" | tr -d ' \n')
+REMOVED=$(echo "${REMOVED:-0}" | tr -d ' \n')
+FILES=$(echo "${FILES:-0}" | tr -d ' \n')
+K8S=$(echo "${K8S:-0}" | tr -d ' \n')
+DEPS=$(echo "${DEPS:-0}" | tr -d ' \n')
+
 # ── API Call ──────────────────────────────────────────────────────────────────
 RESPONSE=$(curl -s -w "\n%{http_code}" -X POST https://api.bluecodeit.com/analyze \
   -H "Content-Type: application/json" \
