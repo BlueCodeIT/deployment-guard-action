@@ -36,6 +36,10 @@ outputs:
 runs:
   using: 'composite'
   steps:
+    - name: Make script executable
+      shell: bash
+      run: chmod +x ${{ github.action_path }}/scripts/analyze.sh
+
     - name: Run Deployment Guard Analysis
       shell: bash
       run: ${{ github.action_path }}/scripts/analyze.sh
