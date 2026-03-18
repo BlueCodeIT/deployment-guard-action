@@ -21,6 +21,8 @@ DEPS=$(echo "${DEPS:-0}" | tr -d ' \n')
 INC7=$(echo "${INCIDENTS_7D:-0}" | tr -d ' \n')
 INC30=$(echo "${INCIDENTS_30D:-0}" | tr -d ' \n')
 
+echo "DEBUG: $(echo "{\"repo\":\"${GITHUB_REPO}\",\"branch\":\"${GITHUB_BRANCH}\",\"commit_sha\":\"${GITHUB_SHA}\",\"diff_lines_added\":${ADDED},\"diff_lines_removed\":${REMOVED},\"diff_files_changed\":${FILES},\"k8s_manifests_changed\":${K8S},\"dependency_updates\":${DEPS},\"major_version_bumps\":0,\"incidents_last_7d\":${INC7},\"incidents_last_30d\":${INC30}}")"
+
 RESPONSE=$(curl -s -w "\n%{http_code}" -X POST https://api.bluecodeit.com/analyze \
   -H "Content-Type: application/json" \
   -H "X-API-Key: ${GUARD_API_KEY}" \
