@@ -25,7 +25,7 @@ DEPS=$(echo "${DEPS:-0}" | tr -d ' \n')
 RESPONSE=$(curl -s -w "\n%{http_code}" -X POST https://api.bluecodeit.com/analyze \
   -H "Content-Type: application/json" \
   -H "X-API-Key: ${GUARD_API_KEY}" \
-  --max-time 30 \
+  --max-time 60 \
   -d "{
     \"repo\": \"${GITHUB_REPO}\",
     \"branch\": \"${GITHUB_BRANCH}\",
