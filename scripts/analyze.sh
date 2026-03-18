@@ -25,7 +25,7 @@ DEPS=$(echo "${DEPS:-0}" | tr -d ' \n')
 RESPONSE=$(curl -s -w "\n%{http_code}" -X POST https://api.bluecodeit.com/analyze \
   -H "Content-Type: application/json" \
   -H "X-API-Key: ${GUARD_API_KEY}" \
-  --max-time 30 \
+  --max-time 60 \
   -d "{
     \"repo\": \"${GITHUB_REPO}\",
     \"branch\": \"${GITHUB_BRANCH}\",
@@ -36,8 +36,8 @@ RESPONSE=$(curl -s -w "\n%{http_code}" -X POST https://api.bluecodeit.com/analyz
     \"k8s_manifests_changed\": ${K8S},
     \"dependency_updates\": ${DEPS},
     \"major_version_bumps\": 0,
-    \"incidents_last_7d\": ${INCIDENTS_7D},
-    \"incidents_last_30d\": ${INCIDENTS_30D}
+    INCIDENTS_7D=$(echo "${INCIDENTS_7D:-0}" | tr -d ' \n')
+    INCIDENTS_30D=$(echo "${INCIDENTS_30D:-0}" | tr -d ' \n')
   }")
 
 HTTP_CODE=$(echo "$RESPONSE" | tail -1)
