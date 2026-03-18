@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+set +e
 
 ADDED=$(git diff HEAD~1 --numstat 2>/dev/null | awk '{sum += $1} END {print sum+0}')
 REMOVED=$(git diff HEAD~1 --numstat 2>/dev/null | awk '{sum += $2} END {print sum+0}')
