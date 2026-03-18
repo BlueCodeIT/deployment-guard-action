@@ -1,6 +1,6 @@
 name: 'Deployment Guard'
 description: 'KI-gestützter Risk Score vor jedem Deployment. Analysiert Code-Änderungen und blockiert riskante Deployments automatisch.'
-author: 'BlueCode IT'
+author: 'BlueCodeIT'
 
 branding:
   icon: 'shield'
