@@ -2,7 +2,7 @@
 
 KI-gestützter Risk Score vor jedem Deployment. Analysiert Code-Änderungen und blockiert riskante Deployments automatisch.
 
-**Von [BlueCode IT](https://www.bluecodeit.com)**
+**Von [BlueCodeIT](https://www.bluecodeit.com)**
 
 ---
 
