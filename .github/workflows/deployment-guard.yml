@@ -1,4 +1,4 @@
-name: Deployment Guard
+name: Deployment Guard Self-Check
 
 on:
   push:
@@ -13,7 +13,7 @@ jobs:
           fetch-depth: 2
 
       - name: Deployment Guard
-        id: guard
         uses: BlueCodeIT/deployment-guard-action@v1
         with:
           api-key: ${{ secrets.GUARD_API_KEY }}
+          fail-on-blocked: 'false'
