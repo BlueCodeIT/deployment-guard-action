@@ -38,7 +38,7 @@ jobs:
 
       - name: Deployment Guard
         id: guard
-        uses: BlueCodeIT/deployment-guard-action@v1.5
+        uses: BlueCodeIT/deployment-guard-action@v1
         with:
           api-key: ${{ secrets.GUARD_API_KEY }}
           fail-on-blocked: 'true'
