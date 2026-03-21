@@ -10,7 +10,7 @@ KI-gestützter Risk Score vor jedem Deployment. Analysiert Code-Änderungen und 
 
 ```yaml
 - name: Deployment Guard
-  uses: BlueCodeIT/deployment-guard-action@v1.5
+  uses: BlueCodeIT/deployment-guard-action@v1
   with:
     api-key: ${{ secrets.GUARD_API_KEY }}
 ```
