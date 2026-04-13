@@ -4,7 +4,6 @@ set -e
 FILES=$(git diff HEAD~1 --name-only 2>/dev/null | wc -l | tr -d ' ')
 K8S=$(git diff HEAD~1 --name-only 2>/dev/null | grep -E '\.ya?ml$' | wc -l | tr -d ' ')
 DEPS=$(git diff HEAD~1 --name-only 2>/dev/null | grep -E 'package\.json|requirements\.txt|go\.mod|pom\.xml|Gemfile|Cargo\.toml' | wc -l | tr -d ' ')
-
 ADDED=$(echo "${ADDED:-0}"  | tr -d ' \n')
 REMOVED=$(echo "${REMOVED:-0}" | tr -d ' \n')
 FILES=$(echo "${FILES:-0}"  | tr -d ' \n')
