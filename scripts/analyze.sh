@@ -20,7 +20,7 @@ echo "DEBUG: ${PAYLOAD}"
 RESPONSE=$(curl -s -w "\n%{http_code}" -X POST https://api.bluecodeit.com/analyze \
   -H "Content-Type: application/json" \
   -H "X-API-Key: ${GUARD_API_KEY}" \
-  --max-time 60 \
+  --max-time 30 \
   -d "${PAYLOAD}")
 
 HTTP_CODE=$(echo "$RESPONSE" | tail -1)
