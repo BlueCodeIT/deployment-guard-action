@@ -66,6 +66,7 @@ jobs:
 | `fail-on-blocked` | Pipeline bei BLOCKED fehlschlagen | ❌ | `true` |
 | `incidents-last-7d` | Incidents letzte 7 Tage | ❌ | `0` |
 | `incidents-last-30d` | Incidents letzte 30 Tage | ❌ | `0` |
+| `fail-on-blocked` | Pipeline bei BLOCKED fehlschlagen | ❌ | `false` |
 
 ## Outputs
 
@@ -101,5 +102,5 @@ jobs:
 
 - 🌐 [bluecodeit.com](https://www.bluecodeit.com)
 - 📊 [Dashboard](https://www.bluecodeit.com/dashboard)
-- 📖 [API Docs](https://api.bluecodeit.com/docs)
+- 🚀 [API Key holen](https://www.bluecodeit.com/signup)
 - 📧 [support@bluecodeit.com](mailto:support@bluecodeit.com)
