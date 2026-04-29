@@ -1,0 +1,22 @@
+name: Security Scans
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  semgrep:
+    uses: BlueCodeIT/pipeline-security-templates/.github/workflows/semgrep-sast.yml@main
+    with:
+      config: 'p/default'
+      severity: 'WARNING'
+      fail-on-issues: false   # erstmal nur reporten
+
+  checkov:
+    uses: BlueCodeIT/pipeline-security-templates/.github/workflows/checkov-iac.yml@main
+    with:
+      framework: 'github_actions,dockerfile'   # nur was hier sinn macht
+      soft-fail: true   # erstmal nur reporten
