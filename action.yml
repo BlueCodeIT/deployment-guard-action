@@ -22,6 +22,30 @@ inputs:
     description: 'Anzahl Incidents in den letzten 30 Tagen'
     required: false
     default: '0'
+  trivy-critical-cves:
+    description: 'Anzahl CRITICAL CVEs aus Trivy'
+    required: false
+    default: '0'
+  trivy-high-cves:
+    description: 'Anzahl HIGH CVEs aus Trivy'
+    required: false
+    default: '0'
+  semgrep-findings:
+    description: 'Gesamtzahl Semgrep-Findings'
+    required: false
+    default: '0'
+  semgrep-high-severity:
+    description: 'Anzahl Semgrep HIGH-Severity Findings (Subset von semgrep-findings)'
+    required: false
+    default: '0'
+  checkov-failed-checks:
+    description: 'Gesamtzahl Checkov Failed Checks'
+    required: false
+    default: '0'
+  checkov-critical-failures:
+    description: 'Anzahl Checkov CRITICAL Failures (Subset von checkov-failed-checks)'
+    required: false
+    default: '0'
 
 outputs:
   score:
@@ -48,6 +72,13 @@ runs:
         FAIL_ON_BLOCKED: ${{ inputs.fail-on-blocked }}
         INCIDENTS_7D: ${{ inputs.incidents-last-7d }}
         INCIDENTS_30D: ${{ inputs.incidents-last-30d }}
+        TRIVY_CRITICAL_CVES: ${{ inputs.trivy-critical-cves }}
+        TRIVY_HIGH_CVES: ${{ inputs.trivy-high-cves }}
+        SEMGREP_FINDINGS: ${{ inputs.semgrep-findings }}
+        SEMGREP_HIGH_SEVERITY: ${{ inputs.semgrep-high-severity }}
+        CHECKOV_FAILED_CHECKS: ${{ inputs.checkov-failed-checks }}
+        CHECKOV_CRITICAL_FAILURES: ${{ inputs.checkov-critical-failures }}
         GITHUB_REPO: ${{ github.repository }}
         GITHUB_BRANCH: ${{ github.ref_name }}
         GITHUB_SHA: ${{ github.sha }}
+      

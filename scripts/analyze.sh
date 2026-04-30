@@ -92,6 +92,14 @@ fi
 INC7=$(echo "${INCIDENTS_7D:-0}"  | tr -d ' \n')
 INC30=$(echo "${INCIDENTS_30D:-0}" | tr -d ' \n')
 
+# Pipeline Security Findings (Phase 2)
+TRIVY_CRIT=$(echo "${TRIVY_CRITICAL_CVES:-0}"      | tr -d ' \n')
+TRIVY_HIGH=$(echo "${TRIVY_HIGH_CVES:-0}"          | tr -d ' \n')
+SEM_TOTAL=$(echo "${SEMGREP_FINDINGS:-0}"          | tr -d ' \n')
+SEM_HIGH=$(echo "${SEMGREP_HIGH_SEVERITY:-0}"      | tr -d ' \n')
+CKV_TOTAL=$(echo "${CHECKOV_FAILED_CHECKS:-0}"     | tr -d ' \n')
+CKV_CRIT=$(echo "${CHECKOV_CRITICAL_FAILURES:-0}"  | tr -d ' \n')
+
 echo "  [guard] diff_lines_added:     ${ADDED}"
 echo "  [guard] diff_lines_removed:   ${REMOVED}"
 echo "  [guard] diff_files_changed:   ${FILES}"
@@ -104,6 +112,12 @@ echo "  [guard] dependency_updates:   ${DEP_FILES}"
 echo "  [guard] major_version_bumps:  ${MAJOR_BUMPS}"
 echo "  [guard] incidents_7d:         ${INC7}"
 echo "  [guard] incidents_30d:        ${INC30}"
+echo "  [guard] trivy_critical:       ${TRIVY_CRIT}"
+echo "  [guard] trivy_high:           ${TRIVY_HIGH}"
+echo "  [guard] semgrep_findings:     ${SEM_TOTAL}"
+echo "  [guard] semgrep_high:         ${SEM_HIGH}"
+echo "  [guard] checkov_failed:       ${CKV_TOTAL}"
+echo "  [guard] checkov_critical:     ${CKV_CRIT}"
 
 PAYLOAD=$(cat <<EOF
 {
@@ -121,7 +135,13 @@ PAYLOAD=$(cat <<EOF
   "dependency_updates": ${DEP_FILES},
   "major_version_bumps": ${MAJOR_BUMPS},
   "incidents_last_7d": ${INC7},
-  "incidents_last_30d": ${INC30}
+  "incidents_last_30d": ${INC30},
+  "trivy_critical_cves": ${TRIVY_CRIT},
+  "trivy_high_cves": ${TRIVY_HIGH},
+  "semgrep_findings": ${SEM_TOTAL},
+  "semgrep_high_severity": ${SEM_HIGH},
+  "checkov_failed_checks": ${CKV_TOTAL},
+  "checkov_critical_failures": ${CKV_CRIT}
 }
 EOF
 )
