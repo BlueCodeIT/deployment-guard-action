@@ -1,7 +1,6 @@
 #!/bin/bash
 set -e
 
-# ── Diff Statistiken ──────────────────────────────────────────────
 ADDED=$(git diff HEAD~1 HEAD --numstat 2>/dev/null | awk '{sum += $1} END {print sum+0}')
 REMOVED=$(git diff HEAD~1 HEAD --numstat 2>/dev/null | awk '{sum += $2} END {print sum+0}')
 FILES=$(git diff HEAD~1 --name-only 2>/dev/null | wc -l | tr -d ' ')
@@ -9,8 +8,6 @@ FILES=$(git diff HEAD~1 --name-only 2>/dev/null | wc -l | tr -d ' ')
 [ -z "$REMOVED" ] && REMOVED=0
 [ -z "$FILES" ]   && FILES=0
 
-# ── K8s Manifeste — nur echte Manifeste zählen ───────────────────
-# Ausschluss: GitHub Actions Workflows, action.yml, Helm Templates
 CHANGED_YAMLS=$(git diff HEAD~1 --name-only 2>/dev/null | \
   grep -E '\.ya?ml$' | \
   grep -v '\.github/' | \
@@ -23,7 +20,6 @@ if [ -n "$CHANGED_YAMLS" ]; then
 fi
 [ -z "$K8S" ] && K8S=0
 
-# ── Single Replica & fehlendes PDB erkennen ───────────────────────
 SINGLE_REPLICA="false"
 MISSING_PDB="false"
 HAS_DEPLOYMENT=0
@@ -48,7 +44,6 @@ if [ "$HAS_DEPLOYMENT" -gt 0 ] && [ "$HAS_PDB" -eq 0 ]; then
   MISSING_PDB="true"
 fi
 
-# ── Helm Parameter ────────────────────────────────────────────────
 HELM_VALUES=0
 if [ -n "$CHANGED_YAMLS" ]; then
   HELM_VALUES=$(echo "$CHANGED_YAMLS" | \
@@ -61,13 +56,11 @@ HELM_CHART_CHANGED=$(git diff HEAD~1 --name-only 2>/dev/null | grep -E 'Chart\.y
 [ -z "$HELM_CHART_CHANGED" ] && HELM_CHART_CHANGED=0
 [ "$HELM_CHART_CHANGED" -gt 0 ] && HELM_CHART_BUMPED="true" || HELM_CHART_BUMPED="false"
 
-# ── Dependency Updates ────────────────────────────────────────────
 DEP_FILES=$(git diff HEAD~1 --name-only 2>/dev/null | \
   grep -E 'package\.json|requirements\.txt|go\.mod|pom\.xml|Gemfile|Cargo\.toml|yarn\.lock|package-lock\.json' | \
   wc -l | tr -d ' ')
 [ -z "$DEP_FILES" ] && DEP_FILES=0
 
-# ── Major Version Bumps erkennen ──────────────────────────────────
 MAJOR_BUMPS=0
 
 if git diff HEAD~1 --name-only 2>/dev/null | grep -q 'package\.json'; then
@@ -96,11 +89,9 @@ if git diff HEAD~1 --name-only 2>/dev/null | grep -q 'go\.mod'; then
   MAJOR_BUMPS=$((MAJOR_BUMPS + GO_MAJOR))
 fi
 
-# ── Incidents aus Input ───────────────────────────────────────────
 INC7=$(echo "${INCIDENTS_7D:-0}"  | tr -d ' \n')
 INC30=$(echo "${INCIDENTS_30D:-0}" | tr -d ' \n')
 
-# ── Debug Output ──────────────────────────────────────────────────
 echo "  [guard] diff_lines_added:     ${ADDED}"
 echo "  [guard] diff_lines_removed:   ${REMOVED}"
 echo "  [guard] diff_files_changed:   ${FILES}"
@@ -114,7 +105,6 @@ echo "  [guard] major_version_bumps:  ${MAJOR_BUMPS}"
 echo "  [guard] incidents_7d:         ${INC7}"
 echo "  [guard] incidents_30d:        ${INC30}"
 
-# ── API Request ───────────────────────────────────────────────────
 PAYLOAD=$(cat <<EOF
 {
   "repo": "${GITHUB_REPO}",
@@ -156,7 +146,6 @@ if [ "$HTTP_CODE" != "200" ]; then
   exit 0
 fi
 
-# ── Response parsen ───────────────────────────────────────────────
 SCORE=$(echo "$BODY"       | grep -o '"score":[0-9]*'           | cut -d: -f2)
 STATUS=$(echo "$BODY"      | grep -o '"status":"[^"]*"'          | cut -d'"' -f4)
 VERDICT=$(echo "$BODY"     | grep -o '"verdict":"[^"]*"'         | cut -d'"' -f4)
@@ -167,7 +156,6 @@ echo "status=${STATUS}"             >> $GITHUB_OUTPUT
 echo "verdict=${VERDICT}"           >> $GITHUB_OUTPUT
 echo "explanation=${EXPLANATION}"   >> $GITHUB_OUTPUT
 
-# ── Output ────────────────────────────────────────────────────────
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "🛡️  Deployment Guard — Risk Analysis"
