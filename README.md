@@ -65,6 +65,30 @@ jobs:
 
 ---
 
+## Mit Pipeline Security Stack (Team Plan)
+
+Für vollständigen DevSecOps-Stack — Trivy + Semgrep + Checkov werden ausgeführt und Findings automatisch in den Risk Score gespeist:
+
+```yaml
+jobs:
+  security:
+    uses: BlueCodeIT/pipeline-security-templates/.github/workflows/full-stack-with-guard.yml@v1.1.1
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
+    with:
+      trivy-dockerfile: 'Dockerfile'
+      semgrep-config: 'p/default'
+      checkov-directory: '.'
+    secrets:
+      guard-api-key: ${{ secrets.GUARD_API_KEY }}
+```
+
+Templates: [BlueCodeIT/pipeline-security-templates](https://github.com/BlueCodeIT/pipeline-security-templates) (MIT-Lizenz)
+
+---
+
 ## Inputs
 
 | Input | Beschreibung | Pflicht | Standard |
@@ -73,6 +97,12 @@ jobs:
 | `fail-on-blocked` | Pipeline bei BLOCKED fehlschlagen lassen | ❌ | `true` |
 | `incidents-last-7d` | Produktionsvorfälle letzte 7 Tage (manuell angeben) | ❌ | `0` |
 | `incidents-last-30d` | Produktionsvorfälle letzte 30 Tage (manuell angeben) | ❌ | `0` |
+| `trivy-critical-cves` | Anzahl CRITICAL CVEs aus Trivy (CVSS ≥ 9.0) | ❌ | `0` |
+| `trivy-high-cves` | Anzahl HIGH CVEs aus Trivy (CVSS 7.0-8.9) | ❌ | `0` |
+| `semgrep-findings` | Gesamtanzahl Semgrep-Findings | ❌ | `0` |
+| `semgrep-high-severity` | HIGH-Severity Semgrep-Findings (level=error) | ❌ | `0` |
+| `checkov-failed-checks` | Fehlgeschlagene Checkov-Checks | ❌ | `0` |
+| `checkov-critical-failures` | CRITICAL Checkov-Failures | ❌ | `0` |
 
 ---
 
@@ -131,6 +161,10 @@ Wird **nicht** automatisch erkannt — muss manuell übergeben werden:
     incidents-last-7d: '2'
     incidents-last-30d: '5'
 ```
+### Pipeline-Findings (optional)
+Werden **nicht** automatisch erkannt — werden über die [Pipeline Security Templates](https://github.com/BlueCodeIT/pipeline-security-templates) durchgereicht. Im Standalone-Setup einfach weglassen, dann sind alle Felder 0.
+
+Felder: `trivy-critical-cves`, `trivy-high-cves`, `semgrep-findings`, `semgrep-high-severity`, `checkov-failed-checks`, `checkov-critical-failures`
 
 ---
 
@@ -145,16 +179,17 @@ Wird **nicht** automatisch erkannt — muss manuell übergeben werden:
 
 ### Gewichtung der Faktoren
 
-| Faktor | Gewicht* | Beschreibung |
+| Faktor | Gewicht | Beschreibung |
 |---|---|---|
-| Diff-Komplexität | 30% | Zeilen + Dateien (logarithmische Skala) |
-| Kubernetes-Risiko | 30% | Manifeste, Helm, ArgoCD, Single Replica, PDB |
-| Dependency-Risiko | 20% | Updates, Major Version Bumps |
-| Fehlerhistorie | 20% | Vorfälle letzte 7 und 30 Tage |
+| Diff-Komplexität | 30%* | Geänderte Zeilen und Dateien (logarithmische Skala) |
+| Kubernetes-Risiko | 30%* | Manifeste, Helm-Charts, ArgoCD-Status, Single Replica, fehlendes PDB |
+| Dependency-Risiko | 20%* | Dependency-Updates, Major Version Bumps |
+| Fehlerhistorie | 20%* | Vorfälle der letzten 7 und 30 Tage |
+| Pipeline-Findings | 15%* | Optional · Trivy CVEs, Semgrep SAST, Checkov IaC |
 
-*Adaptive Gewichtung: Bei Repos ohne K8s-Kontext wird das K8s-Gewicht automatisch auf die anderen Faktoren verteilt.
+*Adaptive Gewichtung — die Gewichte ändern sich je nach Repo-Kontext (mit/ohne K8s, mit/ohne Pipeline-Findings). Frontend-Repos ohne K8s bekommen genauso faire Scores wie Full-Stack-Repos mit Helm und Pipeline-Scans.
 
-Thresholds (Standard: WARN ab 50, BLOCK ab 75) sind für Team-Nutzer im Dashboard konfigurierbar.
+**Repo-Historie als Kontext:** Bei jeder Analyse wird der aktuelle Score mit dem Median und Trend früherer Analysen desselben Repositories abgeglichen. Liegt der Score deutlich über dem Median, geht er leicht nach oben (max. +5). Folgt er dem üblichen Muster, kann er sich um wenige Punkte abmildern (max. -3). Ab 5 historischen Analysen aktiv.
 
 ---
 
@@ -194,6 +229,12 @@ Die Action gibt alle erkannten Werte vor dem API-Call aus:
   [guard] major_version_bumps:  1
   [guard] incidents_7d:         0
   [guard] incidents_30d:        0
+  [guard] trivy_critical:       0
+  [guard] trivy_high:           0
+  [guard] semgrep_findings:     0
+  [guard] semgrep_high:         0
+  [guard] checkov_failed:       0
+  [guard] checkov_critical:     0
 ```
 
 ---
