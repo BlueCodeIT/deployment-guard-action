@@ -191,6 +191,26 @@ Felder: `trivy-critical-cves`, `trivy-high-cves`, `semgrep-findings`, `semgrep-h
 
 **Repo-Historie als Kontext:** Bei jeder Analyse wird der aktuelle Score mit dem Median und Trend früherer Analysen desselben Repositories abgeglichen. Liegt der Score deutlich über dem Median, geht er leicht nach oben (max. +5). Folgt er dem üblichen Muster, kann er sich um wenige Punkte abmildern (max. -3). Ab 5 historischen Analysen aktiv.
 
+### Adjustment-Layer
+
+Auf den Basis-Score werden vier zusätzliche Layer angewendet:
+
+| Layer | Auswirkung | Beschreibung |
+|---|---|---|
+| Repo-Historie | -3 bis +5 | Vergleich mit Median/Trend früherer Analysen |
+| Time-Awareness | bis +25 | Friday-PM, Wochenende und Late-Night-Deploys = höheres Risiko |
+| Pfad-Klassifizierung | -5 bis +20 | High-Risk-Pfade (`auth/`, `migrations/`) riskanter als `docs/`, `tests/` |
+| Repo-Typ | überschreibt Gewichtung | Frontend / Backend-API / Infra / Library — automatisch erkannt |
+
+**Repo-Typ wird automatisch erkannt:**
+- `Dockerfile` + Python-Deps → Backend-API
+- `package.json` ohne Dockerfile → Frontend
+- Terraform-Files (`.tf`) → Infrastructure
+- `setup.py` ohne Dockerfile → Library
+- Sonst → Unknown (Standard-Gewichtung)
+
+Die Action sendet diese Indikatoren automatisch ans Backend — keine manuelle Konfiguration nötig.
+
 ---
 
 ## Häufige Probleme
@@ -235,6 +255,13 @@ Die Action gibt alle erkannten Werte vor dem API-Call aus:
   [guard] semgrep_high:         0
   [guard] checkov_failed:       0
   [guard] checkov_critical:     0
+  [guard] changed_paths:        app/auth/login.py,docs/readme.md
+  [guard] has_dockerfile:       true
+  [guard] has_python_deps:      true
+  [guard] has_node_deps:        false
+  [guard] has_terraform:        false
+  [guard] has_setup_py:         false
+  
 ```
 
 ---
