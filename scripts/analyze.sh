@@ -19,8 +19,8 @@ if [ -n "$CHANGED_YAMLS" ]; then
   K8S=$(echo "$CHANGED_YAMLS" | xargs grep -l 'kind:' 2>/dev/null | wc -l | tr -d ' ')
 fi
 [ -z "$K8S" ] && K8S=0
-# Phase 3 — File-Path-Awareness
-# Liste der geänderten Files für path-tier-Klassifizierung im Backend
+
+# ── Phase 3 — File-Path-Awareness ────────────────────────────────────────
 CHANGED_PATHS=$(git diff HEAD~1 --name-only 2>/dev/null | tr '\n' ',' | sed 's/,$//')
 [ -z "$CHANGED_PATHS" ] && CHANGED_PATHS=""
 
@@ -29,6 +29,25 @@ if [ -n "${DIFF_CHANGED_PATHS:-}" ]; then
   CHANGED_PATHS="${DIFF_CHANGED_PATHS}"
 fi
 
+# ── Phase 5 — Repo-Type-Detection Metadata ───────────────────────────────
+HAS_DOCKERFILE="false"
+HAS_PYTHON_DEPS="false"
+HAS_NODE_DEPS="false"
+HAS_TERRAFORM="false"
+HAS_SETUP_PY="false"
+
+[ -f "Dockerfile" ] || [ -f "dockerfile" ] && HAS_DOCKERFILE="true"
+[ -f "requirements.txt" ] || [ -f "pyproject.toml" ] || [ -f "Pipfile" ] && HAS_PYTHON_DEPS="true"
+[ -f "package.json" ] && HAS_NODE_DEPS="true"
+
+# Terraform-Files irgendwo im Repo?
+if find . -maxdepth 3 -name "*.tf" -type f 2>/dev/null | head -1 | grep -q '.'; then
+  HAS_TERRAFORM="true"
+fi
+
+[ -f "setup.py" ] && HAS_SETUP_PY="true"
+
+# ── K8s-Specifics (Single Replica, PDB) ──────────────────────────────────
 SINGLE_REPLICA="false"
 MISSING_PDB="false"
 HAS_DEPLOYMENT=0
@@ -65,6 +84,7 @@ HELM_CHART_CHANGED=$(git diff HEAD~1 --name-only 2>/dev/null | grep -E 'Chart\.y
 [ -z "$HELM_CHART_CHANGED" ] && HELM_CHART_CHANGED=0
 [ "$HELM_CHART_CHANGED" -gt 0 ] && HELM_CHART_BUMPED="true" || HELM_CHART_BUMPED="false"
 
+# ── Dependencies & Major Bumps ────────────────────────────────────────────
 DEP_FILES=$(git diff HEAD~1 --name-only 2>/dev/null | \
   grep -E 'package\.json|requirements\.txt|go\.mod|pom\.xml|Gemfile|Cargo\.toml|yarn\.lock|package-lock\.json' | \
   wc -l | tr -d ' ')
@@ -101,7 +121,7 @@ fi
 INC7=$(echo "${INCIDENTS_7D:-0}"  | tr -d ' \n')
 INC30=$(echo "${INCIDENTS_30D:-0}" | tr -d ' \n')
 
-# Pipeline Security Findings (Phase 2)
+# ── Pipeline Security Findings (Phase 2) ─────────────────────────────────
 TRIVY_CRIT=$(echo "${TRIVY_CRITICAL_CVES:-0}"      | tr -d ' \n')
 TRIVY_HIGH=$(echo "${TRIVY_HIGH_CVES:-0}"          | tr -d ' \n')
 SEM_TOTAL=$(echo "${SEMGREP_FINDINGS:-0}"          | tr -d ' \n')
@@ -109,6 +129,7 @@ SEM_HIGH=$(echo "${SEMGREP_HIGH_SEVERITY:-0}"      | tr -d ' \n')
 CKV_TOTAL=$(echo "${CHECKOV_FAILED_CHECKS:-0}"     | tr -d ' \n')
 CKV_CRIT=$(echo "${CHECKOV_CRITICAL_FAILURES:-0}"  | tr -d ' \n')
 
+# ── Debug Output ─────────────────────────────────────────────────────────
 echo "  [guard] diff_lines_added:     ${ADDED}"
 echo "  [guard] diff_lines_removed:   ${REMOVED}"
 echo "  [guard] diff_files_changed:   ${FILES}"
@@ -128,15 +149,19 @@ echo "  [guard] semgrep_high:         ${SEM_HIGH}"
 echo "  [guard] checkov_failed:       ${CKV_TOTAL}"
 echo "  [guard] checkov_critical:     ${CKV_CRIT}"
 echo "  [guard] changed_paths:        ${CHANGED_PATHS:-(none)}"
+echo "  [guard] has_dockerfile:       ${HAS_DOCKERFILE}"
+echo "  [guard] has_python_deps:      ${HAS_PYTHON_DEPS}"
+echo "  [guard] has_node_deps:        ${HAS_NODE_DEPS}"
+echo "  [guard] has_terraform:        ${HAS_TERRAFORM}"
+echo "  [guard] has_setup_py:         ${HAS_SETUP_PY}"
 
-# JSON-Array aus Komma-Liste bauen — ohne jq-Dependency
+# ── JSON-Array aus Komma-Liste bauen — ohne jq-Dependency ────────────────
 if [ -n "$CHANGED_PATHS" ]; then
   PATHS_JSON="["
   IFS=',' read -ra PATH_ARR <<< "$CHANGED_PATHS"
   FIRST=1
   for p in "${PATH_ARR[@]}"; do
     [ -z "$p" ] && continue
-    # Escape doppelte Anführungszeichen (selten in Pfaden, aber safety-first)
     p_escaped="${p//\"/\\\"}"
     if [ $FIRST -eq 1 ]; then
       PATHS_JSON="${PATHS_JSON}\"${p_escaped}\""
@@ -150,6 +175,7 @@ else
   PATHS_JSON="[]"
 fi
 
+# ── Payload bauen & senden ───────────────────────────────────────────────
 PAYLOAD=$(cat <<EOF
 {
   "repo": "${GITHUB_REPO}",
@@ -173,7 +199,12 @@ PAYLOAD=$(cat <<EOF
   "semgrep_high_severity": ${SEM_HIGH},
   "checkov_failed_checks": ${CKV_TOTAL},
   "checkov_critical_failures": ${CKV_CRIT},
-  "diff_changed_paths": ${PATHS_JSON}
+  "diff_changed_paths": ${PATHS_JSON},
+  "has_dockerfile": ${HAS_DOCKERFILE},
+  "has_python_deps": ${HAS_PYTHON_DEPS},
+  "has_node_deps": ${HAS_NODE_DEPS},
+  "has_terraform": ${HAS_TERRAFORM},
+  "has_setup_py": ${HAS_SETUP_PY}
 }
 EOF
 )

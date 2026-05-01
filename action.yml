@@ -86,4 +86,3 @@ runs:
         GITHUB_BRANCH: ${{ github.ref_name }}
         GITHUB_SHA: ${{ github.sha }}
         DIFF_CHANGED_PATHS: ${{ inputs.diff-changed-paths }}
-      
