@@ -46,6 +46,10 @@ inputs:
     description: 'Anzahl Checkov CRITICAL Failures (Subset von checkov-failed-checks)'
     required: false
     default: '0'
+  diff-changed-paths:
+    description: 'Komma-separierte Liste der geänderten File-Pfade (wird auto-detektiert wenn leer)'
+    required: false
+    default: ''
 
 outputs:
   score:
@@ -81,4 +85,5 @@ runs:
         GITHUB_REPO: ${{ github.repository }}
         GITHUB_BRANCH: ${{ github.ref_name }}
         GITHUB_SHA: ${{ github.sha }}
+        DIFF_CHANGED_PATHS: ${{ inputs.diff-changed-paths }}
       
