@@ -19,6 +19,15 @@ if [ -n "$CHANGED_YAMLS" ]; then
   K8S=$(echo "$CHANGED_YAMLS" | xargs grep -l 'kind:' 2>/dev/null | wc -l | tr -d ' ')
 fi
 [ -z "$K8S" ] && K8S=0
+# Phase 3 — File-Path-Awareness
+# Liste der geänderten Files für path-tier-Klassifizierung im Backend
+CHANGED_PATHS=$(git diff HEAD~1 --name-only 2>/dev/null | tr '\n' ',' | sed 's/,$//')
+[ -z "$CHANGED_PATHS" ] && CHANGED_PATHS=""
+
+# Override über Env-Variable möglich (Action-Input)
+if [ -n "${DIFF_CHANGED_PATHS:-}" ]; then
+  CHANGED_PATHS="${DIFF_CHANGED_PATHS}"
+fi
 
 SINGLE_REPLICA="false"
 MISSING_PDB="false"
@@ -118,6 +127,28 @@ echo "  [guard] semgrep_findings:     ${SEM_TOTAL}"
 echo "  [guard] semgrep_high:         ${SEM_HIGH}"
 echo "  [guard] checkov_failed:       ${CKV_TOTAL}"
 echo "  [guard] checkov_critical:     ${CKV_CRIT}"
+echo "  [guard] changed_paths:        ${CHANGED_PATHS:-(none)}"
+
+# JSON-Array aus Komma-Liste bauen — ohne jq-Dependency
+if [ -n "$CHANGED_PATHS" ]; then
+  PATHS_JSON="["
+  IFS=',' read -ra PATH_ARR <<< "$CHANGED_PATHS"
+  FIRST=1
+  for p in "${PATH_ARR[@]}"; do
+    [ -z "$p" ] && continue
+    # Escape doppelte Anführungszeichen (selten in Pfaden, aber safety-first)
+    p_escaped="${p//\"/\\\"}"
+    if [ $FIRST -eq 1 ]; then
+      PATHS_JSON="${PATHS_JSON}\"${p_escaped}\""
+      FIRST=0
+    else
+      PATHS_JSON="${PATHS_JSON},\"${p_escaped}\""
+    fi
+  done
+  PATHS_JSON="${PATHS_JSON}]"
+else
+  PATHS_JSON="[]"
+fi
 
 PAYLOAD=$(cat <<EOF
 {
@@ -141,7 +172,8 @@ PAYLOAD=$(cat <<EOF
   "semgrep_findings": ${SEM_TOTAL},
   "semgrep_high_severity": ${SEM_HIGH},
   "checkov_failed_checks": ${CKV_TOTAL},
-  "checkov_critical_failures": ${CKV_CRIT}
+  "checkov_critical_failures": ${CKV_CRIT},
+  "diff_changed_paths": ${PATHS_JSON}
 }
 EOF
 )
