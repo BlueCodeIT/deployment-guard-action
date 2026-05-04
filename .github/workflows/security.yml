@@ -9,18 +9,26 @@ on:
 
 permissions:
   contents: read
-  security-events: write 
+  security-events: write
 
 jobs:
   semgrep:
-    uses: BlueCodeIT/pipeline-security-templates/.github/workflows/semgrep-sast.yml@main
+    uses: BlueCodeIT/pipeline-security-templates/.github/workflows/semgrep-sast.yml@v1
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
     with:
       config: 'p/default'
       severity: 'WARNING'
       fail-on-issues: false
-
+  
   checkov:
-    uses: BlueCodeIT/pipeline-security-templates/.github/workflows/checkov-iac.yml@main
+    uses: BlueCodeIT/pipeline-security-templates/.github/workflows/checkov-iac.yml@v1
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
     with:
       framework: 'github_actions,dockerfile'
       soft-fail: true
