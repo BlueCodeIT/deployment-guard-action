@@ -209,7 +209,8 @@ PAYLOAD=$(cat <<EOF
 EOF
 )
 
-RESPONSE=$(curl -s -w "\n%{http_code}" -X POST https://api.bluecodeit.com/analyze \
+GUARD_API_URL="${GUARD_API_URL:-https://api.pantevosystems.com}"
+RESPONSE=$(curl -s -w "\n%{http_code}" -X POST ${GUARD_API_URL}/analyze \
   -H "Content-Type: application/json" \
   -H "X-API-Key: ${GUARD_API_KEY}" \
   --max-time 120 \

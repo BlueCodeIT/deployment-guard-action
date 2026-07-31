@@ -2,7 +2,7 @@
 
 KI-gestützter Risk Score vor jedem Deployment. Analysiert Code-Änderungen automatisch und blockiert riskante Deployments.
 
-**Von [BlueCodeIT](https://www.bluecodeit.com)**
+**Von [PantevoSystems](https://www.pantevosystems.com)**
 
 ---
 
@@ -14,7 +14,7 @@ KI-gestützter Risk Score vor jedem Deployment. Analysiert Code-Änderungen auto
     fetch-depth: 2
 
 - name: Deployment Guard
-  uses: BlueCodeIT/deployment-guard-action@v1
+  uses: PantevoSystems/deployment-guard-action@v1
   with:
     api-key: ${{ secrets.GUARD_API_KEY }}
 ```
@@ -42,7 +42,7 @@ jobs:
 
       - name: Deployment Guard
         id: guard
-        uses: BlueCodeIT/deployment-guard-action@v1
+        uses: PantevoSystems/deployment-guard-action@v1
         with:
           api-key: ${{ secrets.GUARD_API_KEY }}
           fail-on-blocked: 'true'
@@ -72,7 +72,7 @@ Für vollständigen DevSecOps-Stack — Trivy + Semgrep + Checkov werden ausgef�
 ```yaml
 jobs:
   security:
-    uses: BlueCodeIT/pipeline-security-templates/.github/workflows/full-stack-with-guard.yml@v1.1.1
+    uses: PantevoSystems/pipeline-security-templates/.github/workflows/full-stack-with-guard.yml@v1.2.0.1.1
     permissions:
       contents: read
       security-events: write
@@ -85,7 +85,7 @@ jobs:
       guard-api-key: ${{ secrets.GUARD_API_KEY }}
 ```
 
-Templates: [BlueCodeIT/pipeline-security-templates](https://github.com/BlueCodeIT/pipeline-security-templates) (MIT-Lizenz)
+Templates: [PantevoSystems/pipeline-security-templates](https://github.com/PantevoSystems/pipeline-security-templates) (MIT-Lizenz)
 
 ---
 
@@ -155,14 +155,14 @@ Wird **nicht** automatisch erkannt — muss manuell übergeben werden:
 
 ```yaml
 - name: Deployment Guard
-  uses: BlueCodeIT/deployment-guard-action@v1
+  uses: PantevoSystems/deployment-guard-action@v1
   with:
     api-key: ${{ secrets.GUARD_API_KEY }}
     incidents-last-7d: '2'
     incidents-last-30d: '5'
 ```
 ### Pipeline-Findings (optional)
-Werden **nicht** automatisch erkannt — werden über die [Pipeline Security Templates](https://github.com/BlueCodeIT/pipeline-security-templates) durchgereicht. Im Standalone-Setup einfach weglassen, dann sind alle Felder 0.
+Werden **nicht** automatisch erkannt — werden über die [Pipeline Security Templates](https://github.com/PantevoSystems/pipeline-security-templates) durchgereicht. Im Standalone-Setup einfach weglassen, dann sind alle Felder 0.
 
 Felder: `trivy-critical-cves`, `trivy-high-cves`, `semgrep-findings`, `semgrep-high-severity`, `checkov-failed-checks`, `checkov-critical-failures`
 
@@ -268,7 +268,7 @@ Die Action gibt alle erkannten Werte vor dem API-Call aus:
 
 ## API Key holen
 
-1. [bluecodeit.com/signup](https://www.bluecodeit.com/signup) → Free Plan (kostenlos, keine Kreditkarte)
+1. [pantevosystems.com/signup](https://www.pantevosystems.com/signup) → Free Plan (kostenlos, keine Kreditkarte)
 2. API Key als GitHub Secret anlegen: **Settings → Secrets and variables → Actions → New repository secret → `GUARD_API_KEY`**
 3. Action einbinden — fertig
 
@@ -276,7 +276,7 @@ Die Action gibt alle erkannten Werte vor dem API-Call aus:
 
 ## Links
 
-- 🌐 [bluecodeit.com](https://www.bluecodeit.com)
-- 📊 [Dashboard](https://www.bluecodeit.com/dashboard)
-- 🚀 [API Key holen](https://www.bluecodeit.com/signup)
-- 📧 [support@bluecodeit.com](mailto:support@bluecodeit.com)
+- 🌐 [pantevosystems.com](https://www.pantevosystems.com)
+- 📊 [Dashboard](https://www.pantevosystems.com/dashboard)
+- 🚀 [API Key holen](https://www.pantevosystems.com/signup)
+- 📧 [support@pantevosystems.com](mailto:support@pantevosystems.com)
