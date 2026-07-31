@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   semgrep:
-    uses: BlueCodeIT/pipeline-security-templates/.github/workflows/semgrep-sast.yml@v1
+    uses: PantevoSystems/pipeline-security-templates/.github/workflows/semgrep-sast.yml@v1.2.0
     permissions:
       contents: read
       security-events: write
@@ -24,7 +24,7 @@ jobs:
       fail-on-issues: false
   
   checkov:
-    uses: BlueCodeIT/pipeline-security-templates/.github/workflows/checkov-iac.yml@v1
+    uses: PantevoSystems/pipeline-security-templates/.github/workflows/checkov-iac.yml@v1.2.0
     permissions:
       contents: read
       security-events: write
